@@ -64,7 +64,9 @@ ROLE
 You are a note generator producing Cornell-style notes.
 
 OBJECTIVE
-Generate maximum detailed study notes from the input.
+Generate maximum detailed study notes from the input topic or text. If only a topic
+is provided, synthesize accurate, generally accepted knowledge for that topic.
+NEVER reply with "insufficient context"; always produce helpful notes.
 
 OUTPUT
 Return ONLY a valid JSON object, no markdown, no prose.
@@ -82,6 +84,8 @@ RULES
 - Do not wrap with code fences.
 - Do not add commentary.
 - Use plain text only.
+- Keep notes concise and structured (bullets/short paragraphs), ~1–2 pages.
+- If the input is broad, give a high‑level outline with key subtopics.
 - If a field has no content, return "" or [].
 - For each question, the corresponding answer must be in the same index in answers.
 `.trim()
@@ -145,6 +149,27 @@ async function fillTemplateFormPDF(data: any) {
     form.getTextField("questions").setText(sanitizeText(qna))
   } catch { }
 
+  // Timestamp and centered branding (no visible URL)
+  try {
+    const first = pdfDoc.getPages()[0]
+    const std = await pdfDoc.embedStandardFont(StandardFonts.Helvetica)
+    const { width, height } = first.getSize()
+
+    const stamp = new Date().toLocaleString()
+    first.drawText(`Date: ${stamp}`, { x: 20, y: height - 28, size: 9, font: std, color: rgb(0.2, 0.2, 0.2) })
+
+    const left = "DemonLM — Created by students for students — "
+    const right = "DemonKing"
+    const size = 11
+    const wLeft = std.widthOfTextAtSize(left, size)
+    const wRight = std.widthOfTextAtSize(right, size)
+    const total = wLeft + wRight
+    const x0 = (width - total) / 2
+    const y0 = height - 58
+    first.drawText(left, { x: x0, y: y0, size, font: std, color: rgb(0, 0, 0) }) // pitch black
+    first.drawText(right, { x: x0 + wLeft, y: y0, size, font: std, color: rgb(0.2, 0.5, 1) }) // blue
+  } catch {}
+
   const outDir = path.join(process.cwd(), "storage", "smartnotes")
   await fs.promises.mkdir(outDir, { recursive: true })
   const safeTitle = sanitizeText(data.title || "notes").replace(/[^a-z0-9]/gi, "_").slice(0, 50)
@@ -164,9 +189,33 @@ async function createSimplePDF(data: any) {
   const width = page.getWidth() - margin * 2
   let y = page.getHeight() - margin
 
+  // Timestamp top-left
+  const stamp = new Date().toLocaleString()
+  page.drawText(`Date: ${stamp}`, { x: margin, y, size: 10, font, color: rgb(0, 0, 0) })
+  y -= 16
+
+  // "SmartNotes" header (reduced size) centered
+  const header = "SmartNotes"
+  const snSize = 8
+  const snW = font.widthOfTextAtSize(header, snSize)
+  const snX = (page.getWidth() - snW) / 2
+  page.drawText(header, { x: snX, y, size: snSize, font, color: rgb(0, 0, 0) })
+  y -= 24
+
+  // Centered branding under SmartNotes
+  const left = "DemonLM — Created by students for students — "
+  const right = "DemonKing"
+  const bSize = 11
+  const wLeft = font.widthOfTextAtSize(left, bSize)
+  const wRight = font.widthOfTextAtSize(right, bSize)
+  const bX = (page.getWidth() - (wLeft + wRight)) / 2
+  page.drawText(left, { x: bX, y, size: bSize, font, color: rgb(0, 0, 0) })
+  page.drawText(right, { x: bX + wLeft, y, size: bSize, font, color: rgb(0.2, 0.5, 1) })
+  y -= 22
+
   const title = sanitizeText(data.title || "Notes")
-  page.drawText(title, { x: margin, y, size: 20, font, color: rgb(0, 0, 0) })
-  y -= 28
+  page.drawText(title, { x: margin, y, size: 14, font, color: rgb(0, 0, 0) })
+  y -= 22
 
   const sections = [
     { h: "Notes", t: sanitizeText(data.notes || "") },
@@ -206,6 +255,9 @@ async function createSimplePDF(data: any) {
   const safeTitle = sanitizeText(data.title || "notes").replace(/[^a-z0-9]/gi, "_").slice(0, 50)
   const ts = new Date().toISOString().replace(/[:.]/g, "-")
   const outPath = path.join(outDir, `${safeTitle || "notes"}_${ts}.pdf`)
+
+  // No visible URL footer per request
+
   const outBytes = await pdfDoc.save()
   await fs.promises.writeFile(outPath, outBytes)
   return outPath

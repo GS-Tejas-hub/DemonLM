@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { askWithContext, BASE_SYSTEM_PROMPT } from "../../lib/ai/ask"
+import cors from "cors"
 
 const allowedRoots = [
   path.resolve(process.cwd(), "storage"),
@@ -67,11 +68,24 @@ CONTEXT FOCUS
 You are an AI companion${focus}. Use ONLY the supplied context to respond.
 If the context is insufficient, say so clearly rather than guessing.
 Favor concise, actionable study guidance grounded in the provided material.
+
+STRICT OUTPUT CAP FOR COMPANION (Only for "answer" field in JSON):
+- Keep "answer" to at most 4 lines (ideally 2–4 sentences; <= ~100 words).
+- Prefer a single short paragraph or up to four short bullet points.
+- No code fences, no tables, no long lists, no headings.
+- If you lack enough context, reply in <= 2 lines and state what is missing.
+
+FLASHCARDS (lightweight):
+- Provide at most 1 short flashcard, each with a compact Q/A.
+- Avoid verbose tags; keep tags if already required but prefer 3–5 concise tags.
 `
   return `${BASE_SYSTEM_PROMPT}\n\n${extra.trim()}`
 }
 
 export function companionRoutes(app: any) {
+  // Explicit CORS preflight handler for environments where wildcard OPTIONS is not matched
+  app.options("/api/companion/ask", cors())
+
   app.post("/api/companion/ask", async (req: any, res: any) => {
     try {
       const body = req.body || {}

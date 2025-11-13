@@ -72,7 +72,7 @@ export default function Chat() {
   const [connecting, setConnecting] = useState<boolean>(!!(initialChatId || initialQuestion));
   const [awaitingAnswer, setAwaitingAnswer] = useState<boolean>(false);
   const [topic, setTopic] = useState<string>("");
-  const { setDocument } = useCompanion();
+  const { setDocument, setOpen: openCompanion } = useCompanion();
 
   const selPopupRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -296,7 +296,7 @@ export default function Chat() {
     <div className="flex flex-col min-h-screen w-full px-4 lg:pl-28 lg:pr-4">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 mt-20 lg:mt-6 mb-16">
         <div className="flex-1 pr-6">
-          <div className="w-full max-w-5xl mx-auto p-4 pt-2 pb-28">
+          <div className="w-full max-w-5xl mx-auto p-4 pt-28 md:pt-2 pb-28">
             <div className="space-y-6">
               {list.map((m, i) => {
                 const userBubble = "inline-block max-w-[85%] bg-stone-900/70 border border-zinc-800 rounded-2xl px-4 py-3";
@@ -359,6 +359,14 @@ export default function Chat() {
         addNote={(text) => { addToBag("note", `Note: ${text.slice(0, 30)}${text.length > 30 ? "..." : ""}`, text); setSelected(null); }}
         askDoubt={(text) => { const v = text.trim(); if (v) sendFollowup(v); setSelected(null); }}
       />
+
+      {/* Mobile companion trigger above composer */}
+      <button
+        className="md:hidden fixed top-2 right-4 z-50 px-3 py-1.5 rounded-xl bg-sky-600 text-white text-xs shadow"
+        onClick={() => openCompanion(true as any)}
+      >
+        Companion
+      </button>
 
       <Composer disabled={busy} onSend={sendFollowup} />
       <BagFab count={bag.length} onClick={() => setBagOpen(true)} />

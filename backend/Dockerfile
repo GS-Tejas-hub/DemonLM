@@ -2,6 +2,7 @@
 FROM node:22.16.0-alpine AS base
 
 WORKDIR /app
+RUN apk add --no-cache ffmpeg bash
 
 # builder
 FROM base AS builder
