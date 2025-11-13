@@ -26,11 +26,6 @@ services:
         value: ffmpeg
       - key: db_mode
         value: json
-      - key: VITE_BACKEND_URL
-        fromService:
-          type: web
-          name: pagelm-backend
-          property: url
 
   - type: web
     name: pagelm-frontend
@@ -40,11 +35,6 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
-      - key: VITE_BACKEND_URL
-        fromService:
-          type: web
-          name: pagelm-backend
-          property: url
       - key: VITE_TIMEOUT
         value: 90000
 
