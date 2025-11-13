@@ -1,6 +1,20 @@
 import path from 'path'
+import fs from 'fs'
 
-process.loadEnvFile(path.resolve(process.cwd(), '.env'))
+const envPath = path.resolve(process.cwd(), '.env')
+
+// ✅ Only load .env if it actually exists (local dev)
+// Railway and other hosts already provide environment vars
+if (fs.existsSync(envPath)) {
+  try {
+    process.loadEnvFile(envPath)
+    console.log('✅ Loaded local .env file')
+  } catch (err) {
+    console.warn('⚠️ Failed to load .env file:', err)
+  }
+} else {
+  console.log('⚙️ No local .env file found — using Railway environment variables')
+}
 
 export const config = {
   db_mode: process.env.db_mode || 'json',
@@ -10,9 +24,9 @@ export const config = {
   embeddings_provider: process.env.EMB_PROVIDER || 'openai',
   openrouter: process.env.OPENROUTER_API_KEY || '',
   openrouter_model: process.env.openrouter_model || '',
-  gemini: process.env.gemini || process.env.GOOGLE_API_KEY || '',
-  gemini_model: process.env.gemini_model || 'gemini-1.5-pro',
-  gemini_embed_model: process.env.gemini_embed_model || 'text-embedding-004',
+  gemini: process.env.gemini || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '',
+  gemini_model: process.env.gemini_model || process.env.GEMINI_MODEL || 'gemini-1.5-pro',
+  gemini_embed_model: process.env.gemini_embed_model || process.env.GEMINI_EMBED_MODEL || 'text-embedding-004',
   openai: process.env.OPENAI_API_KEY || '',
   openai_embed: process.env.OPENAI_EMBED_API_KEY || '',
   openai_model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
