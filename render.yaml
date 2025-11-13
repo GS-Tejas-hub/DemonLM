@@ -2,7 +2,6 @@ services:
   - type: web
     name: pagelm-backend
     env: docker
-    plan: free
     rootDir: .
     dockerfilePath: backend/Dockerfile
     autoDeploy: true
