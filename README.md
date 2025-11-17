@@ -125,28 +125,3 @@ All configuration is handled via environment variables:
 See `.env.example` for all options.
 
 ---
-
-## 👥 Community
-
-Join our [Discord](https://discord.gg/P7HaRayqTh) community to connect, share ideas, and take part in exciting discussions!
-
----
-
-## 🤝 Contributing
-
-We welcome all contributions.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -m "Add feature"`)
-4. Push (`git push origin feature/new-feature`)
-5. Open a Pull Request
-
-**Guidelines:**
-
-- Follow code style and conventions
-- Add tests where needed
-- Update docs for new features
-- Ensure all tests pass before PR
-
----
