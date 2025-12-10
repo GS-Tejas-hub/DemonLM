@@ -1,7 +1,7 @@
 
 ## 🚀 Features
 
-PageLM converts study material into **interactive resources** including quizzes, flashcards, structured notes, and podcasts.  
+DemonLM converts study material into **interactive resources** including quizzes, flashcards, structured notes, and podcasts.  
 The platform provides a modern interface for students, educators, and researchers to **enhance learning efficiency** using state-of-the-art LLMs and TTS systems.
 
 ### Learning Tools
